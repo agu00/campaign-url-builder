@@ -1,0 +1,10 @@
+body {font-family:Calibri;}
+p, label, button {font-size:17px;display:block;}
+h1 {font-size:25px;}
+label {margin:10px 0 10px 0;font-weight:700;}
+textarea, input {width:900px;height:35px;padding:5px;border:1px solid #949494;font-family:Calibri;font-size:14px;display:block;}
+select {font-family:Calibri;font-size:14px;width:912px;height:47px;padding:0;border:1px solid #949494;display:block;}
+button {margin: 10px 0 10px 0;width:200px;height:35px;color:white;background-color:black;border-color:black;border-radius:0.2em;display:inline-block;font-size:14px;}
+.hidden {display:none;}
+.extraMargin {margin-left:50px;width:850px;}
+select.extraMargin {width:862px;}

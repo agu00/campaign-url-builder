@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="This tool allows adding campaign parameters to URLs, so they can measured." />
+    <link rel="stylesheet" href="style.css">
+    <script src="campaign-url-builder.js"></script>
+
+    <title>Campaign URL Builder</title>
+</head>
+<body>
+    <div>
+        <h1>Campaign URL Builder</h1>
+        <p>Thank you for creating a custom campaign URL. Your link will get a few parameters that help us capturing reporting data about your campaign.<br>Later on you will be able to identify the traffic that came from an email newsletter, a social media post or other sources.</p>
+        <br>
+        <label>Campaign Shortname</label>
+        <textarea id="inputOne"></textarea>
+        <label>Term <span style="font-weight:400;font-size:14px;">(optional)</span></label>
+        <textarea id="inputTwo" placeholder="useful to distinguish multiple URLs that go into the same channel"></textarea>
+        <label>Campaign Code</label>
+        <textarea id="inputThree" placeholder="valid campaign code comes from CRM and begins with CMP-"></textarea>
+        <label>Scheduled Release Date</label>
+        <input type="date"  id="inputFour"></input>
+        <label>Destination URL</label>
+        <textarea id="inputFive"></textarea>
+        <label>URL Used In</label> 
+        <select  style="margin-bottom:10px;" name="source" id="inputSix" onchange="showExtraFields()">
+            <option disabled selected>Choose</option>
+            <option value="exacttarget" class="email">Marketing Cloud Email</option>
+            <option value="dynamics-marketing" class="email">Dynamics Marketing Email</option>
+            <option value="partner-outreach" class="email">Partner Client Email (Outlook)</option>
+            <option value="twitter" class="social">Twitter</option>
+            <option value="facebook"  class="social">Facebook</option>
+            <option value="linkedin" class="social">LinkedIn</option>
+            <option value="bambu" class="social">Bambu</option>
+            <option value="wechat" class="social">WeChat</option>
+            <option value="instagram" class="social">Instagram</option>
+            <option value="linkedin" class="paid-social">LinkedIn Ads</option>
+            <option value="linkedin" class="inmail-ad">LinkedIn InMail Ads</option>
+            <option value="facebook" class="paid-social">Facebook Ads</option>
+            <option value="instagram" class="paid-social">Instagram Ads</option>
+            <option value="twitter" class="paid-social">Twitter Ads</option>
+            <option value="oliver-wyman-connect" class="referral">Alumni Portal</option>
+            <option value="internal"  class="email">Internal Email</option>
+            <option value="internal" class="referral">Internal Slack</option>
+            <option value="internal" class="referral">Internal Intranet</option>
+            <option value="marketing-collateral" class="qr">QR Code</option>
+            <option value="google" class="cpc">Search Ads on Google</option>
+            <option value="bing" class="cpc">Search Ads on Bing</option>
+            <option value="internal" class="podcast">Internal Podcast</option>
+            <option value="youtube" class="social">YouTube</option>
+            <option value="youtube" class="paid-social">YouTube Ads</option>   
+            <option value="" class="display">Online Display Ads</option>
+            <option value="" class="banner">Online Banner Ads</option>
+            <option value="other" class="">Other</option>
+        </select>
+
+        <!-- extra fields to show with option index 25, 26, 27 --> 
+
+        <select class="hidden extraMargin" name="medium" id="inputSeven">
+            <option disabled selected>Choose Medium</option>
+            <option value="banner">Banner</option>
+            <option value="cpc">CPC</option>
+            <option value="cmp">CPM</option>
+            <option value="display">Display</option>
+            <option value="email">Email</option>
+            <option value="inemail-ad">InMail Ad</option>
+            <option value="paid-social">Paid Social</option>
+            <option value="pdf">PDF</option>
+            <option value="print">Print</option>
+            <option value="qr">QR</option>
+            <option value="referral">Referral</option>
+            <option value="social">Social</option>
+            <option value="podcast">Podcast</option>
+            <option value="other">Other</option>
+        </select>
+
+        <label class="hidden extraMargin" style="font-size:14px;" id="am-label">Other Medium</label>
+        <textarea style="margin-bottom:20px;" class="hidden extraMargin" id="inputEight"></textarea>
+       
+        <select  class="hidden extraMargin" name="otherSource" id="inputNine">
+            <option disabled selected>Choose Source</option>
+            <option value="bambu">Bambu</option>
+            <option value="bing">Bing</option>
+            <option value="dynamics-marketing">Dynamics Marketing</option>
+            <option value="exacttarget">Exacttarget</option>
+            <option value="facebook">Facebook</option>
+            <option value="google">Google</option>
+            <option value="instagram">Instagram</option>
+            <option value="internal">Internal</option>
+            <option value="linkedin">Linkedin</option>
+            <option value="marketing-collateral">Marketing Collateral</option>
+            <option value="oliver-wyman-connect">OW Connect</option>
+            <option value="outlook">Outlook</option>
+            <option value="partner-outreach">Partner Outreach</option>
+            <option value="twitter">Twitter</option>
+            <option value="wechat">Wechat</option>
+            <option value="youtube">Youtube</option>
+        </select>
+
+        <label class="hidden extraMargin" style="font-size:14px;" id="as-label">Other Source</label>
+        <textarea class="hidden extraMargin" id="inputTen"></textarea>
+
+        <label class="hidden extraMargin" style="font-size:14px;" id="as2-label">Source</label>
+        <textarea class="hidden extraMargin" id="inputTen2"></textarea>
+
+        <!-- result and buttons --> 
+        <button onclick="campaign_url()">get campaign URL</button>
+        <textarea id="output"></textarea>
+        <button onclick="copyResult()">copy</button>
+
+    </div>
+
+    <script>
+
+        var one = document.getElementById('inputOne');
+        var two = document.getElementById('inputTwo');
+        var three = document.getElementById('inputThree');
+        var four = document.getElementById('inputFour');
+        var five = document.getElementById('inputFive');    
+        var six = document.getElementById('inputSix');
+        var seven = document.getElementById('inputSeven');
+        var eight = document.getElementById('inputEight');
+        var nine = document.getElementById('inputNine');
+        var ten = document.getElementById('inputTen');
+        // for Display Ads and Banner Ads (no "Other")
+        var ten2 = document.getElementById('inputTen2');
+
+        var am = document.getElementById('am-label');
+        var as = document.getElementById('as-label');
+        var as2 = document.getElementById('as2-label');
+
+    
+    // show/hide extra fields based on 'URL Used In'
+
+        function showExtraFields() {
+
+            if(six.selectedIndex == "27") {
+
+                am.classList.remove('hidden');
+                as.classList.remove('hidden');
+                seven.classList.remove('hidden');
+                eight.classList.remove('hidden');
+                nine.classList.remove('hidden');
+                ten.classList.remove('hidden');
+                as2.classList.add('hidden');
+                ten2.classList.add('hidden');
+
+            } else if (six.selectedIndex == "25" || six.selectedIndex == "26") {
+
+                as2.classList.remove('hidden');
+                ten2.classList.remove('hidden');
+                am.classList.add('hidden');
+                as.classList.add('hidden');
+                ten.classList.add('hidden');
+                seven.classList.add('hidden');
+                eight.classList.add('hidden');
+                nine.classList.add('hidden');
+
+            } else if (six.selectedIndex < "25") {
+                
+                as.classList.add('hidden');
+                ten.classList.add('hidden');
+                am.classList.add('hidden');
+                seven.classList.add('hidden');
+                eight.classList.add('hidden');
+                nine.classList.add('hidden');
+                as2.classList.add('hidden');
+                ten2.classList.add('hidden');
+            }
+        }
+          
+
+        function campaign_url() {
+            
+            var outp = document.getElementById('output');
+            var five = document.getElementById('inputFive'); 
+            var campaign_name = one.value.trim().toLowerCase().split(" ").join("-");
+            var keyword_term;
+
+            // URL with anchor
+            if (five.value.includes('#')) {
+                var anchor = five.value.slice(five.value.indexOf('#'));
+                five = five.value.substring(0,five.value.indexOf('#'));
+                
+                // looking for empty fields
+                if (one.value.length == 0 || three.value.length == 0 || four.value.length == 0 || five.length == 0 || six.value == "Choose") {
+                    alert("Please fill in all fields.");
+                // checking if code starts with cmp-
+                }  else if (three.value.toLowerCase().includes("cmp-") == false) {
+                    alert("Please insert valid campaign code. Campaign codes come from CRM, and begin with 'CMP-'. To locate your campaign's code, use advanced find and add the 'Campaign Code' column into the results. CRM automatically generates this.");
+                // checking if Term was provided
+                } else if (two.value.length === 0) {
+                    // if Display Ads or Banner Ads
+                    if (six.selectedIndex == "25" || six.selectedIndex == "26"){
+                        if (ten2.value.length == 0) {
+                            alert("Please fill in all fields."); 
+                        } else {
+                            outp.innerHTML = five + '?utm_source=' + ten2.value.trim().toLowerCase().split(" ").join("-") + '&utm_medium=' + six[six.selectedIndex].className + '&utm_campaign=' + campaign_name + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-") + anchor;
+                        }
+                    // 
+                    } else if (six.selectedIndex == "27"){
+                        if ((seven.value == "Choose Medium" && eight.value.length == 0) || (nine.value == "Choose Source" && ten.value.length == 0)) {
+                            alert("Please fill in all fields."); 
+                        } else {
+                            if (eight.value.length == 0) {
+                                if (ten.value.length == 0) {
+                                    outp.innerHTML = five + '?utm_source=' + nine.value + '&utm_medium=' + seven.value + '&utm_campaign=' + campaign_name + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-") + anchor;
+                                } else {
+                                    outp.innerHTML = five + '?utm_source=' + ten.value.trim().toLowerCase().split(" ").join("-") + '&utm_medium=' + seven.value + '&utm_campaign=' + campaign_name + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-") + anchor;
+                                }
+                            } else {
+                                if (ten.value.length == 0) {
+                                    outp.innerHTML = five + '?utm_source=' + nine.value + '&utm_medium=' + eight.value.trim().toLowerCase() + '&utm_campaign=' + campaign_name + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-") + anchor;
+                                } else {
+                                    outp.innerHTML = five + '?utm_source=' + ten.value + '&utm_medium=' + eight.value.trim().toLowerCase().split(" ").join("-") + '&utm_campaign=' + campaign_name + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-") + anchor;
+                                }
+                            }
+                        }
+                    
+                    } else {
+                        outp.innerHTML = five + '?utm_source=' + six.value + '&utm_medium=' + six[six.selectedIndex].className + '&utm_campaign=' + campaign_name + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-") + anchor;
+                    }
+                } else {
+                    keyword_term = two.value.trim().toLowerCase().split(" ").join("-");
+                    
+                    
+                    if (six.selectedIndex == "25" || six.selectedIndex == "26"){
+                        if (ten2.value.length == 0) {
+                            alert("Please fill in all fields."); 
+                        } else {
+                            outp.innerHTML = five + '?utm_source=' + ten2.value.trim().toLowerCase().split(" ").join("-") + '&utm_medium=' + six[six.selectedIndex].className + '&utm_campaign=' + campaign_name + '&utm_term=' + keyword_term + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-") + anchor;
+                        }
+                    } else if (six.selectedIndex == "27"){
+                        if ((seven.value == "Choose Medium" && eight.value.length == 0) || (nine.value == "Choose Source" && ten.value.length == 0)) {
+                            alert("Please fill in all fields."); 
+                        } else {
+                            if (eight.value.length == 0) {
+                                if (ten.value.length == 0) {
+                                    outp.innerHTML = five + '?utm_source=' + nine.value + '&utm_medium=' + seven.value + '&utm_campaign=' + campaign_name + '&utm_term=' + keyword_term + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-") + anchor;
+                                } else {
+                                    outp.innerHTML = five + '?utm_source=' + ten.value.trim().toLowerCase().split(" ").join("-") + '&utm_medium=' + seven.value + '&utm_campaign=' + campaign_name + '&utm_term=' + keyword_term + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-") + anchor;
+                                }
+                            } else {
+                                if (ten.value.length == 0) {
+                                    outp.innerHTML = five + '?utm_source=' + nine.value + '&utm_medium=' + eight.value.trim().toLowerCase() + '&utm_campaign=' + campaign_name + '&utm_term=' + keyword_term + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-") + anchor;
+                                } else {
+                                    outp.innerHTML = five + '?utm_source=' + ten.value.trim().toLowerCase().split(" ").join("-") + '&utm_medium=' + eight.value.trim().toLowerCase().split(" ").join("-") + '&utm_campaign=' + campaign_name + '&utm_term=' + keyword_term  + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-") + anchor;
+                                }
+                            }
+                        }
+                    
+                    } else {
+                        outp.innerHTML = five + '?utm_source=' + six.value + '&utm_medium=' + six[six.selectedIndex].className + '&utm_campaign=' + campaign_name + '&utm_term=' + keyword_term  + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-") + anchor;
+                    }
+                    
+                }
+
+            // URL without anchor
+            } else {
+           
+                // looking for empty fields
+                if (one.value.length == 0 || three.value.length == 0 || four.value.length == 0 || five.value.length == 0 || six.value == "Choose") {
+                    alert('Please fill in all fields.');
+                // checking if code starts with cmp-
+                }  else if (three.value.toLowerCase().includes('cmp-') == false) {
+                    alert("Please insert valid campaign code. Campaign codes come from CRM, and begin with 'CMP-'. To locate your campaign's code, use advanced find and add the 'Campaign Code' column into the results. CRM automatically generates this.");
+                // checking if Term was provided
+                } else if (two.value.length === 0) {
+
+                    if (six.selectedIndex == "25" || six.selectedIndex == "26"){
+                        if (ten2.value.length == 0) {
+                            alert("Please fill in all fields."); 
+                        } else {
+                            outp.innerHTML = five.value + '?utm_source=' + ten2.value.trim().toLowerCase().split(" ").join("-") + '&utm_medium=' + six[six.selectedIndex].className + '&utm_campaign=' + campaign_name + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-");
+                        }
+                    } else if (six.selectedIndex == "27") {
+                        if ((seven.value == "Choose Medium" && eight.value.length == 0) || (nine.value == "Choose Source" && ten.value.length == 0)) {
+                            alert("Please fill in all fields."); 
+                        } else {
+                            if (eight.value.length == 0) {
+                                if (ten.value.length == 0) {
+                                    outp.innerHTML = five.value + '?utm_source=' + nine.value + '&utm_medium=' + seven.value + '&utm_campaign=' + campaign_name + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-") + anchor;
+                                } else {
+                                    outp.innerHTML = five.value + '?utm_source=' + ten.value.trim().toLowerCase().split(" ").join("-") + '&utm_medium=' + seven.value + '&utm_campaign=' + campaign_name + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-");
+                                }
+                            } else {
+                                if (ten.value.length == 0) {
+                                    outp.innerHTML = five.value + '?utm_source=' + nine.value + '&utm_medium=' + eight.value.trim().toLowerCase() + '&utm_campaign=' + campaign_name + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-");
+                                } else {
+                                    outp.innerHTML = five.value + '?utm_source=' + ten.value + '&utm_medium=' + eight.value.trim().toLowerCase().split(" ").join("-") + '&utm_campaign=' + campaign_name + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-");
+                                }
+                            }
+                        }
+                    
+                    } else {
+                        outp.innerHTML = five.value + '?utm_source=' + six.value + '&utm_medium=' + six[six.selectedIndex].className + '&utm_campaign=' + campaign_name + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-");
+                    }
+
+                } else {
+                    keyword_term = two.value.trim().toLowerCase().split(" ").join("-");
+                    
+                    if (six.selectedIndex == "25" || six.selectedIndex == "26"){
+                        if (ten2.value.length == 0) {
+                            alert("Please fill in all fields."); 
+                        } else {
+                            outp.innerHTML = five.value + '?utm_source=' + ten2.value.trim().toLowerCase().split(" ").join("-") + '&utm_medium=' + six[six.selectedIndex].className + '&utm_campaign=' + campaign_name + '&utm_term=' + keyword_term + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-");
+                        }
+                    } else if (six.selectedIndex == "27") {
+                        if ((seven.value == "Choose Medium" && eight.value.length == 0) || (nine.value == "Choose Source" && ten.value.length == 0)) {
+                            alert("Please fill in all fields."); 
+                        } else {
+                            if (eight.value.length == 0) {
+                                if (ten.value.length == 0) {
+                                    outp.innerHTML = five.value + '?utm_source=' + nine.value + '&utm_medium=' + seven.value + '&utm_campaign=' + campaign_name + '&utm_term=' + keyword_term + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-");
+                                } else {
+                                    outp.innerHTML = five.value + '?utm_source=' + ten.value.trim().toLowerCase().split(" ").join("-") + '&utm_medium=' + seven.value + '&utm_campaign=' + campaign_name + '&utm_term=' + keyword_term + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-");
+                                }
+                            } else {
+                                if (ten.value.length == 0) {
+                                    outp.innerHTML = five.value + '?utm_source=' + nine.value + '&utm_medium=' + eight.value.trim().toLowerCase() + '&utm_campaign=' + campaign_name + '&utm_term=' + keyword_term + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-");
+                                } else {
+                                    outp.innerHTML = five.value + '?utm_source=' + ten.value.trim().toLowerCase().split(" ").join("-") + '&utm_medium=' + eight.value.trim().toLowerCase().split(" ").join("-") + '&utm_campaign=' + campaign_name + '&utm_term=' + keyword_term  + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-") ;
+                                }
+                            }
+                        }
+                    } else {
+                        outp.innerHTML = five.value + '?utm_source=' + six.value + '&utm_medium=' + six[six.selectedIndex].className + '&utm_campaign=' + campaign_name + '&utm_term=' + keyword_term  + '&utm_content=' + four.value + '&utm_id=' + three.value.trim().toLowerCase().split(" ").join("-");
+                    }
+                }
+            }
+        }
+
+        function copyResult() {
+            document.getElementById('output').select();
+            document.execCommand('copy');
+        }
+     
+        
+    </script>
+</body>
+</html>
+
+
